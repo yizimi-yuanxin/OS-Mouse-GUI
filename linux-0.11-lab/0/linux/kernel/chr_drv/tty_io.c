@@ -347,3 +347,54 @@ void do_tty_interrupt(int tty)
 void chr_dev_init(void)
 {
 }
+
+static unsigned char mouse_input_count = 0;		// 鼠标输入字节数
+static unsigned char mouse_left_down;			// 鼠标左键按下
+static unsigned char mouse_right_down;			// 鼠标右键按下
+static unsigned char mouse_left_move;			// 鼠标向左移动
+static unsigned char mouse_down_move;			// 鼠标向下移动
+
+static int mouse_x_pos;
+static int mouse_y_pos;
+
+static int fcreate = 0;							// ????
+static int count   = 0;
+
+void readmouse(int mousecode) {
+	if (mousecode == 0xFA || mouse_input_count >= 4) { 		// 鼠标命令成功相应的 ACK 字节
+		mouse_input_count = 1;
+		return 0;
+	} 
+	if (count != mousecode)
+		count = mousecode;
+		
+	switch(mouse_input_count) {
+		case 1:
+			mouse_left_down = (mousecode & 0x1) == 0x1;
+			mouse_right_down = (mousecode & 0x2) == 0x2;
+			mouse_left_move = (mousecode & 0x10) == 0x10;
+			mouse_down_move = (mousecode & 0x20) == 0x20;
+			++mouse_input_count;
+			break;
+		case 2:
+			if (mouse_left_move)
+				mouse_x_pos += (int)(0xFFFFFF00 | mousecode);
+			if (mouse_x_pos < 0)
+				mouse_x_pos = 0;
+			if (mouse_x_pos > 360)
+				mouse_x_pos = 360;
+			++mouse_input_count;
+			break;
+		case 3:
+			if (mouse_down_move)
+				mouse_y_pos += (int)(0xFFFFFF00 | mousecode);
+			if (mouse_y_pos < 0)
+				mouse_y_pos = 0;
+			if (mouse_y_pos > 480)
+				mouse_y_pos = 480;
+			++mouse_input_count;
+			break;
+		case 4:
+			break;
+	}
+}

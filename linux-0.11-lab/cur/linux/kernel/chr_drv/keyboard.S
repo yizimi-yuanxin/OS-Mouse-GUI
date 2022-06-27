@@ -14,6 +14,7 @@
 
 .text
 .globl keyboard_interrupt
+.globl mouse_interrupt
 
 /*
  * these are for the keyboard read functions
@@ -586,3 +587,27 @@ reboot:
 	movb $0xfc,%al		/* pulse reset and A20 low */
 	outb %al,$0x64
 die:	jmp die
+
+
+mouse_interrupt:
+	pushl %eax
+	pushl %ebx
+	pushl %ecx
+	pushl %edx
+	push %ds
+	movl $0x10,%eax
+	mov  %ax, %ds		/* 为后面的 call 做准备 */
+	xor  %eax, %eax 	/* 清零 */
+	inb  $0x60, %al		/* 鼠标数据寄存器端口为 0x60，读入鼠标数据 */
+	pushl %eax			
+	call readmouse		/* 调用 C 函数 */
+	addl $4,%esp
+	movb $0x20, %al		/* 8259A 操作命令字 EOI */
+	outb %al, $0xA0		/* 向 8259A 从片发送 EOI */
+	outb %al, $0x20		/* 向 8259A 主片发送 EOI */
+	pop %ds
+	popl %edx
+	popl %ecx
+	popl %ebx
+	popl %eax
+	iret

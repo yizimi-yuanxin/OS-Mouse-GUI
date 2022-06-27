@@ -45,6 +45,7 @@
 
 .text
 .globl keyboard_interrupt
+.globl mouse_interrupt
 
 
 
@@ -272,7 +273,7 @@ func_table:
 	.long 0x455b5b1b,0x465b5b1b,0x475b5b1b,0x485b5b1b
 	.long 0x495b5b1b,0x4a5b5b1b,0x4b5b5b1b,0x4c5b5b1b
 
-# 294 "keyboard.S"
+# 295 "keyboard.S"
 
 key_map:
 	.byte 0,27
@@ -323,7 +324,7 @@ alt_map:
 	.byte '|
 	.fill 10,1,0
 
-# 449 "keyboard.S"
+# 450 "keyboard.S"
 
 
 
@@ -464,3 +465,27 @@ reboot:
 	movb $0xfc,%al		
 	outb %al,$0x64
 die:	jmp die
+
+
+mouse_interrupt:
+	pushl %eax
+	pushl %ebx
+	pushl %ecx
+	pushl %edx
+	push %ds
+	movl $0x10,%eax
+	mov  %ax, %ds		
+	xor  %eax, %eax 	
+	inb  $0x60, %al		
+	pushl %eax			
+	call readmouse		
+	addl $4,%esp
+	movb $0x20, %al		
+	outb %al, $0xA0		
+	outb %al, $0x20		
+	pop %ds
+	popl %edx
+	popl %ecx
+	popl %ebx
+	popl %eax
+	iret
