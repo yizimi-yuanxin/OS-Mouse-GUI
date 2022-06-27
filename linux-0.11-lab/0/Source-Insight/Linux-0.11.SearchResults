@@ -1,0 +1,2 @@
+---- Partition table Matches (1 in 1 files) ----
+Hd.c (kernel\blk_drv):		printk("Partition table%s ok.\n\r",(NR_HD>1)?"s":"");

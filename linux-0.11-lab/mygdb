@@ -1,0 +1,3 @@
+#!/bin/sh
+cd cur/linux
+gdb tools/system -x ../../0.gdb

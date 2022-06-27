@@ -1,0 +1,31 @@
+megs: 16
+
+romimage: file=$BXSHARE/BIOS-bochs-latest
+
+# with the LGPL BIOS, X windows can be used
+vgaromimage: file=$BXSHARE/VGABIOS-lgpl-latest
+
+boot: floppy
+
+floppya: type=1_44
+floppya: 1_44="cur/linux/Image", status=inserted
+
+floppyb: type=1_44
+floppyb: 1_44=vvfat:"b/", status=inserted
+
+ata0: enabled=1, ioaddr1=0x1f0, ioaddr2=0x3f0, irq=14
+ata0-master: type=disk, path="images/rootimage-0.11", mode=flat, cylinders=512, heads=2, spt=20
+
+log: bochsout.txt
+panic: action=ask
+error: action=report
+info: action=report
+debug: action=ignore
+
+pci: enabled=1, chipset=i440fx
+vga: extension=vbe, update_freq=15
+keyboard: serial_delay=250, paste_delay=100000
+cpu: ips=15000000
+clock: sync=slowdown
+mouse: enabled=0
+

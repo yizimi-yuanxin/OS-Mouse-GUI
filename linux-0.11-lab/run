@@ -1,0 +1,3 @@
+#!/bin/sh
+bochs -q -f conf/0.11.bxrc
+
