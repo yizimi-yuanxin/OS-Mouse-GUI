@@ -54,6 +54,7 @@ struct tty_struct {
 
 extern struct tty_struct tty_table[];
 
+
 /*	intr=^C		quit=^|		erase=del	kill=^U
 	eof=^D		vtime=\0	vmin=\1		sxtc=\0
 	start=^Q	stop=^S		susp=^Z		eol=\0

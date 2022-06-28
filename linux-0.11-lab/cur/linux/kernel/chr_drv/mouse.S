@@ -1,9 +1,40 @@
-/*
- *  by yizimi - 2022/06/27
- *  mouse_interrupt
- */
+# 1 "mouse.S"
+# 1 "<built-in>"
+# 1 "<command-line>"
+# 1 "mouse.S"
 
-#include <linux/config.h>
+
+
+
+
+
+# 1 "../../include/linux/config.h" 1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 36 "../../include/linux/config.h"
+
+# 47 "../../include/linux/config.h"
+
+# 7 "mouse.S" 2
 
 .text
 .globl mouse_interrupt
@@ -15,12 +46,16 @@ mouse_interrupt:
 	pushl %ecx
 	pushl %edx
 	push %ds
-	movl $0x10, %eax	
-	mov  %ax, %ds		/* 为后面的 call 做准备 */
-	inb  $0x60, %al		/* 鼠标数据寄存器端口为 0x60 */
-	call readmouse		/* 调用 C 函数 */
+	movl $0x10,%eax
+	mov  %ax, %ds		
+	xor  %eax, %eax 	
+	inb  $0x60, %al		
+	pushl %eax			
+	call readmouse		
 	addl $4,%esp
-	pop %es
+	movb $0x20, %al		
+	outb %al, $0xA0		
+	outb %al, $0x20		
 	pop %ds
 	popl %edx
 	popl %ecx

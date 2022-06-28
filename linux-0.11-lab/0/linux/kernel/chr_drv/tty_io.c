@@ -354,20 +354,34 @@ static unsigned char mouse_right_down;			// 鼠标右键按下
 static unsigned char mouse_left_move;			// 鼠标向左移动
 static unsigned char mouse_down_move;			// 鼠标向下移动
 
-static int mouse_x_pos;
-static int mouse_y_pos;
+static int mouse_x_pos = 10;
+static int mouse_y_pos = 10;
 
-static int fcreate = 0;							// ????
+#define width 	100
+#define height 	200
+
+static int fcreate = 0;
 static int count   = 0;
 
+int volatile jumpp;
+
+
+void post_message() {
+	cli();
+	++jumpp;
+	sti();
+	return;
+}
+
 void readmouse(int mousecode) {
+	if (fcreate == 0)
+		fcreate = 1, count = 33;
 	if (mousecode == 0xFA || mouse_input_count >= 4) { 		// 鼠标命令成功相应的 ACK 字节
 		mouse_input_count = 1;
-		return 0;
+		return;
 	} 
 	if (count != mousecode)
 		count = mousecode;
-		
 	switch(mouse_input_count) {
 		case 1:
 			mouse_left_down = (mousecode & 0x1) == 0x1;
@@ -375,14 +389,18 @@ void readmouse(int mousecode) {
 			mouse_left_move = (mousecode & 0x10) == 0x10;
 			mouse_down_move = (mousecode & 0x20) == 0x20;
 			++mouse_input_count;
+
+			if (mouse_left_down == 1 && mouse_left_move == 0 && mouse_down_move == 0)
+				post_message();
+
 			break;
 		case 2:
 			if (mouse_left_move)
 				mouse_x_pos += (int)(0xFFFFFF00 | mousecode);
 			if (mouse_x_pos < 0)
 				mouse_x_pos = 0;
-			if (mouse_x_pos > 360)
-				mouse_x_pos = 360;
+			if (mouse_x_pos > height)
+				mouse_x_pos = height;
 			++mouse_input_count;
 			break;
 		case 3:
@@ -390,8 +408,8 @@ void readmouse(int mousecode) {
 				mouse_y_pos += (int)(0xFFFFFF00 | mousecode);
 			if (mouse_y_pos < 0)
 				mouse_y_pos = 0;
-			if (mouse_y_pos > 480)
-				mouse_y_pos = 480;
+			if (mouse_y_pos > width)
+				mouse_y_pos = width;
 			++mouse_input_count;
 			break;
 		case 4:

@@ -12,6 +12,7 @@
 #include <asm/segment.h>
 #include <sys/times.h>
 #include <sys/utsname.h>
+#include <asm/io.h>
 
 int sys_ftime()
 {
@@ -289,4 +290,67 @@ int sys_umask(int mask)
 
 	current->umask = mask & 0777;
 	return (old);
+}
+
+int volatile jumpp;
+int flag = 0;
+#define vga_graph_memstart 	0xA0000
+#define vga_graph_memsize  	64000
+#define cursor_size  		6
+#define vga_width			320
+#define vga_height			200
+
+int sys_init_graphics(void) {
+	if (!flag) {
+		outb(0x05, 0x3CE); 			// 图形控制器端口 0x3CE 地址端口 0x05 位置
+		outb(0x40, 0x3CF);			// 设定 shift256 为 1  数据端口
+									// 即设定 256 色，且取出方式为移动拼装
+		outb(0x06, 0x3CE);			// 转到 Memory Map Select 位  
+		outb(0x05, 0x3CF);			// 设定其为 01 的显存区域 且禁止字符模式
+
+		outb(0x04, 0x3C4);			// Sequencer Memory Mode Register 寄存器第四位
+		outb(0x08, 0x3C5);			// 即为 Chain4 位 设定 4 个显存片连在一起
+
+		outb(0x01, 0x3D4);			// 设置 CRT 控制器
+		outb(0x4F, 0x3D5);			// 设置 End Horizontal Display 为 79
+
+		outb(0x03, 0x3D4);			// 设置 End Horizontal Blanking
+		outb(0x82, 0x3D5);			// 设置其中 Display Enable Skew 为 0x82
+
+		outb(0x12, 0x3D4); 			// 设置 Vertical Display End 0-7 位
+		outb(0x8F, 0x3D5);			// 设置为 0x8F, 其实际值为 399
+
+		outb(0x07, 0x3D4);			// 设置 Vertical Display End 8-9 位
+		outb(0x1F, 0x3D5);			// 设置为 0x1F, 其实际值为 399
+
+		outb(0x17, 0x3D4);
+		outb(0xA3, 0x3D5);			// 不是很懂 SLDIV 是个啥啊QAQ
+
+		outb(0x14, 0x3D4);			// 设置 Memory Address Size
+		outb(0x40, 0x3D5); 			// 设置 DW = 1 (第六位)
+
+		outb(0x13, 0x3D4);
+		outb(0x28, 0x3D5);			// 设置 Offset 为 40
+
+		outb(0x0C, 0x3D4);
+		outb(0x00, 0x3D5);			// 高 8 位
+
+		outb(0x0D, 0x3D4);			
+		outb(0x00, 0x3D5); 			// 低 8 位
+
+		flag = 1;
+	}
+	int i, j, x, y;
+	char *p;
+
+	p = vga_graph_memstart;
+	for (i = 0; i < vga_graph_memsize; ++i)  *(p++) = 3;
+
+	x = 20, y = 10;
+	for (i = x - cursor_size; i <= x + cursor_size; ++i) {
+		for (j = y - cursor_size; j <= y + cursor_size; ++j) {
+			p = (char*)vga_graph_memstart + j * vga_width + i;
+			*p = 12; 
+		}
+	}
 }
