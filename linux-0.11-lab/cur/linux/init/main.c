@@ -26,6 +26,8 @@ __always_inline _syscall0(int,pause)
 __always_inline _syscall1(int,setup,void *,BIOS)
 __always_inline _syscall0(int,sync)
 __always_inline _syscall0(int,init_graphics)
+__always_inline _syscall0(int,get_message)
+__always_inline _syscall1(int,timer_create,int,millsoconds)
 
 #include <linux/tty.h>
 #include <linux/sched.h>
@@ -37,6 +39,7 @@ __always_inline _syscall0(int,init_graphics)
 #include <stdarg.h>
 #include <fcntl.h>
 #include <sys/types.h>
+#include <unistd.h>
 
 #include <linux/fs.h>
 
@@ -52,6 +55,15 @@ extern void mem_init(long start, long end);
 extern long rd_init(long mem_start, int length);
 extern long kernel_mktime(struct tm * tm);
 extern long startup_time;
+
+void message_init() {
+	timer_head = NULL;
+	timer_tail = NULL;
+	
+	msg_queue_head = msg_queue_tail = 0;
+	printk("message init finished\n");
+	return;
+}
 
 /*
  * This is set up by the setup-routine at boot-time
@@ -135,7 +147,8 @@ void main(void)		/* This really IS void, no error here. */
 	buffer_init(buffer_memory_end);
 	hd_init();
 	floppy_init();
-	init_graphics();
+	// init_graphics();
+	message_init();
 	sti();
 	move_to_user_mode();
 	if (!fork()) {		/* we count on this going ok */

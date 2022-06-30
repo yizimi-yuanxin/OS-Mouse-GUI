@@ -55,6 +55,20 @@
 #include <sys/utsname.h>
 #include <utime.h>
 
+// message part
+typedef struct user_timer user_timer;
+typedef struct user_timer {
+    long jiffies;
+    int type;
+    long init_jiffies;
+    int pid;
+    user_timer *next;
+} ;
+user_timer *timer_head, *timer_tail;
+int msg_queue_head, msg_queue_tail;
+
+// end 
+
 #ifdef __LIBRARY__
 
 #define __NR_setup	0	/* used only by init, to get system going */
@@ -145,6 +159,11 @@
 #define __NR_readlink	85
 #define __NR_uselib	86
 #define __NR_init_graphics 87
+#define __NR_get_message 88
+#define __NR_repaint 89
+#define __NR_timer_create 90
+#define __NR_get_mouse_posx 91
+#define __NR_get_mouse_posy 92
 #define _syscall0(type,name) \
 type name(void) \
 { \
@@ -264,6 +283,12 @@ int dup2(int oldfd, int newfd);
 int getppid(void);
 pid_t getpgrp(void);
 pid_t setsid(void);
+int get_message(void);
+int init_graphics(void);
+int repaint(int xpos, int ypos, char x);
+int timer_create(int millseconds);
+int get_mouse_posx(void);
+int get_mouse_posy(void);
 
 #define __always_inline inline __attribute__((always_inline))
 

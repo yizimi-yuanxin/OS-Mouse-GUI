@@ -31,7 +31,7 @@
 00000000000i[      ]   Sound support: no
 00000000000i[      ]   USB support: no
 00000000000i[      ]   VGA extension support: vbe
-00000000000i[MEM0  ] allocated memory at 0xb58d7008. after alignment, vector=0xb58d8000
+00000000000i[MEM0  ] allocated memory at 0xb58c6008. after alignment, vector=0xb58c7000
 00000000000i[MEM0  ] 16.00MB
 00000000000i[MEM0  ] mem block size = 0x00020000, blocks=128
 00000000000i[MEM0  ] rom at 0xfffe0000/131072 ('/usr/local/share/bochs/BIOS-bochs-latest')
@@ -42,7 +42,7 @@
 00000000000i[DEV   ] PIIX3 PCI-to-ISA bridge present at device 1, function 0
 00000000000i[PLUGIN] init_dev of 'cmos' plugin device by virtual method
 00000000000i[CMOS  ] Using local time for initial clock
-00000000000i[CMOS  ] Setting initial clock to: Wed Jun 29 00:20:05 2022 (time0=1656458405)
+00000000000i[CMOS  ] Setting initial clock to: Thu Jun 30 04:04:16 2022 (time0=1656558256)
 00000000000i[PLUGIN] init_dev of 'dma' plugin device by virtual method
 00000000000i[DMA   ] channel 4 used by cascade
 00000000000i[PLUGIN] init_dev of 'pic' plugin device by virtual method
@@ -60,7 +60,7 @@
 00000000000i[FLOPPY] fd0: 'cur/linux/Image' ro=0, h=2,t=80,spt=18
 00000000000i[IMG   ] redolog : Standard Header : magic='Bochs Virtual HD Image', type='Redolog', subtype='Volatile', version = 2.0
 00000000000i[IMG   ] redolog : Specific Header : #entries=512, bitmap size=1, exent size = 4096 disk size = 1474560
-00000000000i[IMG   ] 'vvfat' disk opened: directory is 'b/', redolog is 'b//vvfat.dir.q1dGfT'
+00000000000i[IMG   ] 'vvfat' disk opened: directory is 'b/', redolog is 'b//vvfat.dir.XUPdJ9'
 00000000000i[FLOPPY] fd1: 'vvfat:b/' ro=0, h=2,t=80,spt=18
 00000000000i[FLOPPY] Using boot sequence floppy, none, none
 00000000000i[FLOPPY] Floppy boot signature check is enabled
@@ -185,11 +185,11 @@
 00001647811i[BXVGA ] VBE known Display Interface b0c0
 00001647843i[BXVGA ] VBE known Display Interface b0c5
 00001650768i[VBIOS ] VBE Bios $Id: vbe.c,v 1.64 2011/07/19 18:25:05 vruppert Exp $
-00001966830i[XGUI  ] charmap update. Font is 9 x 16
+00001799175i[XGUI  ] charmap update. Font is 9 x 16
 00001995333i[BIOS  ] ata0-0: PCHS=512/2/20 translation=none LCHS=512/2/20
 00005872240i[BIOS  ] IDE time out
 00051753879i[BIOS  ] Booting from 0000:7c00
-00094788163i[FLOPPY] partial read() on floppy image returns 260/512
+00094788163i[FLOPPY] partial read() on floppy image returns 484/512
 00094954828i[FLOPPY] read() on floppy image returns 0
 00095122539i[FLOPPY] read() on floppy image returns 0
 00095289204i[FLOPPY] read() on floppy image returns 0
@@ -320,26 +320,29 @@
 00116129680i[FLOPPY] read() on floppy image returns 0
 00116296345i[FLOPPY] read() on floppy image returns 0
 00116467319i[BIOS  ] int13_harddisk: function 15, unmapped device for ELDL=81
-00308790000p[XGUI  ] >>PANIC<< POWER button turned off.
-00308790000i[CPU0  ] CPU is in protected mode (active)
-00308790000i[CPU0  ] CS.mode = 32 bit
-00308790000i[CPU0  ] SS.mode = 32 bit
-00308790000i[CPU0  ] EFER   = 0x00000000
-00308790000i[CPU0  ] | EAX=00000000  EBX=00090080  ECX=000055f0  EDX=00000000
-00308790000i[CPU0  ] | ESP=0001d18c  EBP=00022f8c  ESI=000900a0  EDI=00021fa0
-00308790000i[CPU0  ] | IOPL=0 id vip vif ac vm rf nt of df IF tf sf ZF af PF cf
-00308790000i[CPU0  ] | SEG sltr(index|ti|rpl)     base    limit G D
-00308790000i[CPU0  ] |  CS:0008( 0001| 0|  0) 00000000 00ffffff 1 1
-00308790000i[CPU0  ] |  DS:0010( 0002| 0|  0) 00000000 00ffffff 1 1
-00308790000i[CPU0  ] |  SS:0010( 0002| 0|  0) 00000000 00ffffff 1 1
-00308790000i[CPU0  ] |  ES:0010( 0002| 0|  0) 00000000 00ffffff 1 1
-00308790000i[CPU0  ] |  FS:0017( 0002| 1|  3) 00000000 0009ffff 1 1
-00308790000i[CPU0  ] |  GS:0017( 0002| 1|  3) 00000000 0009ffff 1 1
-00308790000i[CPU0  ] | EIP=00006e30 (00006e30)
-00308790000i[CPU0  ] | CR0=0x8000001b CR2=0x08038000
-00308790000i[CPU0  ] | CR3=0x00000000 CR4=0x00000000
-00308790000i[CPU0  ] 0x00006e30>> jmp .+48 (0x00006e62) : EB30
-00308790000i[CMOS  ] Last time is 1656458425 (Wed Jun 29 00:20:25 2022)
-00308790000i[XGUI  ] Exit
-00308790000i[      ] restoring default signal behavior
-00308790000i[SIM   ] quit_sim called with exit code 1
+00274483248i[FLOPPY] controller reset in software
+00282475941i[FLOPPY] io_write: config control register: 0x00
+00525630000i[XGUI  ] Mouse capture on
+01888215000i[      ] cpu loop quit, shutting down simulator
+01888215000i[CPU0  ] CPU is in protected mode (active)
+01888215000i[CPU0  ] CS.mode = 32 bit
+01888215000i[CPU0  ] SS.mode = 32 bit
+01888215000i[CPU0  ] EFER   = 0x00000000
+01888215000i[CPU0  ] | EAX=00007940  EBX=0000005e  ECX=00000061  EDX=00000061
+01888215000i[CPU0  ] | ESP=00fc3fbc  EBP=03fffee0  ESI=00000000  EDI=00022080
+01888215000i[CPU0  ] | IOPL=0 id vip vif ac vm rf nt of df IF tf sf zf af pf cf
+01888215000i[CPU0  ] | SEG sltr(index|ti|rpl)     base    limit G D
+01888215000i[CPU0  ] |  CS:0008( 0001| 0|  0) 00000000 00ffffff 1 1
+01888215000i[CPU0  ] |  DS:0010( 0002| 0|  0) 00000000 00ffffff 1 1
+01888215000i[CPU0  ] |  SS:0010( 0002| 0|  0) 00000000 00ffffff 1 1
+01888215000i[CPU0  ] |  ES:0010( 0002| 0|  0) 00000000 00ffffff 1 1
+01888215000i[CPU0  ] |  FS:0017( 0002| 1|  3) 10000000 03ffffff 1 1
+01888215000i[CPU0  ] |  GS:0017( 0002| 1|  3) 10000000 03ffffff 1 1
+01888215000i[CPU0  ] | EIP=00009911 (00009911)
+01888215000i[CPU0  ] | CR0=0x8000001b CR2=0x10001000
+01888215000i[CPU0  ] | CR3=0x00000000 CR4=0x00000000
+01888215000i[CPU0  ] 0x00009911>> mov edx, eax : 89C2
+01888215000i[CMOS  ] Last time is 1656558381 (Thu Jun 30 04:06:21 2022)
+01888215000i[XGUI  ] Exit
+01888215000i[      ] restoring default signal behavior
+01888215000i[SIM   ] quit_sim called with exit code 1

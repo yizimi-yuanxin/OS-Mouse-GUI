@@ -5,7 +5,7 @@
  */
 
 #include <errno.h>
-
+#include <unistd.h>
 #include <linux/sched.h>
 #include <linux/tty.h>
 #include <linux/kernel.h>
@@ -292,7 +292,6 @@ int sys_umask(int mask)
 	return (old);
 }
 
-int volatile jumpp;
 int flag = 0;
 #define vga_graph_memstart 	0xA0000
 #define vga_graph_memsize  	64000
@@ -317,11 +316,11 @@ int sys_init_graphics(void) {
 		outb(0x03, 0x3D4);			// 设置 End Horizontal Blanking
 		outb(0x82, 0x3D5);			// 设置其中 Display Enable Skew 为 0x82
 
-		outb(0x12, 0x3D4); 			// 设置 Vertical Display End 0-7 位
-		outb(0x8F, 0x3D5);			// 设置为 0x8F, 其实际值为 399
-
 		outb(0x07, 0x3D4);			// 设置 Vertical Display End 8-9 位
 		outb(0x1F, 0x3D5);			// 设置为 0x1F, 其实际值为 399
+
+		outb(0x12, 0x3D4); 			// 设置 Vertical Display End 0-7 位
+		outb(0x8F, 0x3D5);			// 设置为 0x8F, 其实际值为 399
 
 		outb(0x17, 0x3D4);
 		outb(0xA3, 0x3D5);			// 不是很懂 SLDIV 是个啥啊QAQ
@@ -340,17 +339,84 @@ int sys_init_graphics(void) {
 
 		flag = 1;
 	}
-	int i, j, x, y;
-	char *p;
+	// int i, j, x, y;
+	// char *p;
 
-	p = vga_graph_memstart;
-	for (i = 0; i < vga_graph_memsize; ++i)  *(p++) = 3;
+	// p = vga_graph_memstart;
+	// for (i = 0; i < vga_graph_memsize; ++i)  *(p++) = 3;
 
-	x = 20, y = 10;
-	for (i = x - cursor_size; i <= x + cursor_size; ++i) {
-		for (j = y - cursor_size; j <= y + cursor_size; ++j) {
-			p = (char*)vga_graph_memstart + j * vga_width + i;
-			*p = 12; 
-		}
-	}
+	// x = 20, y = 10;
+	// for (i = x - cursor_size; i <= x + cursor_size; ++i) {
+	// 	for (j = y - cursor_size; j <= y + cursor_size; ++j) {
+	// 		p = (char*)vga_graph_memstart + j * vga_width + i;
+	// 		*p = 12; 
+	// 	}
+	// }
+}
+extern int mouse_x_pos;
+extern int mouse_y_pos;
+
+typedef struct mouse_pos mouse_pos;
+struct mouse_pos {
+	int x, y;
+};
+
+int sys_get_mouse_posx() {
+	return mouse_x_pos;
+}
+
+int sys_get_mouse_posy() {
+	return mouse_y_pos;
+}
+
+int volatile GetClicked;
+
+int sys_get_message() {
+	user_timer *timer = timer_head;
+	if (timer == timer_tail) return 0;
+	if (timer->type == 1) return 1;
+}
+
+// typedef struct user_timer user_timer;
+// typedef struct user_timer {
+//     long jiffies;
+//     int type;
+//     long init_jiffies;
+//     int pid;
+//     user_timer *next;
+// } ;
+// user_timer *timer_head;
+
+
+void post_message(int from) {
+	user_timer *timer = timer_tail;
+	timer->init_jiffies = timer_head->init_jiffies;
+	timer->jiffies = timer->init_jiffies;
+	timer->type = from;
+	timer_tail = (user_timer*)malloc(sizeof(user_timer));
+	timer->next = timer_tail;
+	timer->pid = current->pid;
+	return;
+}
+
+int sys_timer_create(int millsoconds) {
+	int jiffies = millsoconds / 10;
+	user_timer *timer = (user_timer*)malloc(sizeof(user_timer));
+	timer_head = timer;
+	timer_tail = (user_timer*)malloc(sizeof(user_timer));
+	timer->init_jiffies = jiffies;
+	timer->jiffies = jiffies;
+	timer->type = 0;
+	timer->next = timer_tail;
+	timer->pid = current->pid;
+	return 0;
+}
+
+int sys_repaint(int xpos, int ypos, char x) {
+	if (xpos >= vga_width || xpos < 0) 	return -1;
+	if (ypos >= vga_height || ypos < 0) return -1;
+	char *p = vga_graph_memstart;
+	p = (char *)vga_graph_memstart + ypos * vga_width + xpos;
+	*p = x;
+	return 0;
 }
