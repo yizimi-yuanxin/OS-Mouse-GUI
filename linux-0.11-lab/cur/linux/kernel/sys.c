@@ -401,11 +401,20 @@ int sys_timer_create(int millsoconds, int type) {
 	return 0;
 }
 
-int sys_repaint(int xpos, int ypos, char x) {
-	if (xpos >= vga_width || xpos < 0) 	return -1;
-	if (ypos >= vga_height || ypos < 0) return -1;
+int sys_repaint(paint_pos pos, char x) {
+	int i, j;
+	if (pos.xpos1 < 0 || pos.xpos1 >= vga_width)	return -1;
+	if (pos.xpos2 < 0 || pos.xpos2 >= vga_width)	return -1;
+	if (pos.ypos1 < 0 || pos.ypos1 >= vga_height) 	return -1;
+	if (pos.ypos2 < 0 || pos.ypos2 >= vga_height) 	return -1;
+	if (pos.xpos1 > pos.xpos2)						return -1;
+	if (pos.ypos1 > pos.ypos2)						return -1;
+	
 	char *p = vga_graph_memstart;
-	p = (char *)vga_graph_memstart + ypos * vga_width + xpos;
-	*p = x;
+	for (i = pos.xpos1; i <= pos.xpos2; ++i) 
+		for (j = pos.ypos1; j <= pos.ypos2; ++j)
+		p = (char *)vga_graph_memstart + j * vga_width + i,
+		*p = x;
+
 	return 0;
 }

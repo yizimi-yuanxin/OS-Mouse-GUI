@@ -3,19 +3,29 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <time.h>
-
+/*
+typedef struct {
+	int xpos1, xpos2;
+	int ypos1, ypos2;
+} paint_pos;
+typedef struct paint_pos paint_pos;
+*/
 _syscall1(int, get_message, int*, msg)
 _syscall0(int, init_graphics)
-_syscall3(int, repaint, int, xpos, int, ypos, char, x)
+_syscall2(int, repaint, (paint_pos), pos, char, x)
 _syscall2(int, timer_create, int, millseconds, int, type)
 
 #define BIRD_X      120
 #define BIRD_WIDTH  10
 #define BIRD_HEIGHT 8
+
 typedef struct object object;
 struct object {
     int posx, posy, width, height;
 };
+
+paint_pos ob[20];
+paint_pos bird, all;
 
 #define MAX_X 320
 #define MAX_Y 200
@@ -26,39 +36,20 @@ struct object objects[20];
 int bird_y = 100;
 int minn(int a, int b) { return a < b ? a : b; }
 
-int paint_bd(int now_x, int now_y) {
-    int i, j;
-    for (i = now_x - (BIRD_WIDTH / 2); i <= now_x + (BIRD_WIDTH / 2); ++i) {
-        for (j = now_y - (BIRD_HEIGHT / 2); j <= now_y + (BIRD_HEIGHT / 2); ++j) {
-            int res = repaint(i, j, 12);
-        }
-    }
-}
-
 int object_count;
-int paint_ob() {
+int paint_ob(int if_init) {
     int i, j, k;
-    for (i = 0; i < object_count && objects[i].posx < MAX_X; ++i) {
-        for (j = objects[i].posx; j < minn(objects[i].posx + 10, MAX_X); ++j) {
-            if (objects[i].posy == 0) {
-                for (k = MAX_Y - objects[i].height; k < MAX_Y; ++k) {
-                    int res = repaint(j, k, 12);
-                }
-            } else {
-                for (k = 0; k < objects[i].height; ++k) {
-                    int res = repaint(j, k, 12);
-                }
-            }
-        }
-    }
-}
+    for (i = 0; i < object_count; ++i) {
+        if (!if_init)
+            repaint(ob[i], 3);
 
-int init_gra() {
-    int i, j;
-    for (i = 0; i < MAX_X; ++i) {
-        for (j = 0; j < MAX_Y; ++j) {
-            int res = repaint(i, j, 3);
-        }
+        if (objects[i].posx + 10 < 0) continue;
+        ob[i].xpos1 = maxx(0, objects[i].posx);
+        ob[i].xpos2 = minn(MAX_X, objects[i].posx + 10);
+        ob[i].ypos1 = (objects[i].posy == 0) ? MAX_Y - objects[i].height : 0;
+        ob[i].ypos2 = (objects[i].posy == 0) ? MAX_Y : objects[i].height;
+
+        repaint(ob[i], 12);
     }
 }
 
@@ -82,12 +73,7 @@ int get_stucked(int posx, int posy) {
 }
 
 int _GAME_OVER() {
-    int i, j;
-    for (i = 0; i < MAX_X; ++i) {
-        for (j = 0; j < MAX_Y; ++j) {
-            int res = repaint(i, j, 44);
-        }
-    }
+    repaint(all, 44);
 }
 
 int main() {
@@ -101,12 +87,27 @@ int main() {
         objects[i].posy = rand() % 2;
         objects[i].height = (rand() % 10) * 10;
         objects[i].width = 10;
+        ob[i].xpos1 = objects[i].posx;
+        ob[i].xpos2 = objects[i].posx + 10;
+        ob[i].ypos1 = (objects[i].posy == 0) ? MAX_Y - objects[i].height : 0;
+        ob[i].ypos2 = (objects[i].posy == 0) ? MAX_Y : objects[i].height;
     }
-    /*
     init_graphics();
-    init_gra();
-    paint_bd(now_x, now_y);
-    paint_ob();
+
+    all.xpos1 = 0, all.xpos2 = 319;
+    all.ypos1 = 0, all.ypos2 = 199;
+    
+    repaint(all, 3);
+
+    bird.xpos1 = now_x - (BIRD_WIDTH / 2);
+    bird.xpos2 = now_x + (BIRD_WIDTH / 2);
+    bird.ypos1 = now_y - (BIRD_HEIGHT / 2);
+    bird.ypos1 = now_y + (BIRD_HEIGHT / 2);
+
+    repaint(bird, 12);
+
+    paint_ob(1);
+    /*
     */
     timer_create(4000, 0);
     while(1) {
@@ -117,15 +118,17 @@ int main() {
             now_y -= 20;
         if (*m == 2)
             now_y += 20;
-        /*
-        init_gra();
-        paint_ob();
-        paint_bd(now_x, now_y);
+        repaint(bird, 3);
+        bird.ypos1 = now_y - (BIRD_HEIGHT / 2);
+        bird.ypos2 = now_y + (BIRD_HEIGHT / 2);
+        repaint(bird, 12);
+        /*paint_bd(now_x, now_y);
+        
         */
         if (get_stucked(now_x, now_y)) { ok = 1; break; }
         if (now_y - (BIRD_HEIGHT / 2) < 0 || now_y + (BIRD_HEIGHT / 2) >= 200) { ok = 1; break; }
-        for (i = 0; i < object_count; ++i)
-            objects[i].posx -= 20;
+        
+        paint_ob(0);
     }
     if (ok) _GAME_OVER();
     return 0;

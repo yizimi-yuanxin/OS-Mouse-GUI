@@ -55,7 +55,12 @@
 #include <sys/utsname.h>
 #include <utime.h>
 
-typedef struct  {
+typedef struct {
+	int xpos1, xpos2;
+	int ypos1, ypos2;
+} paint_pos;
+
+typedef struct {
     long jiffies;
     int type;
     long init_jiffies;
@@ -63,14 +68,13 @@ typedef struct  {
     struct user_timer *next;
 } user_timer;
 user_timer *timer_head, *timer_tail;
-int msg_queue_head, msg_queue_tail;
+unsigned int msg_queue_head, msg_queue_tail;
 
 #define MESSAGE_MOUSE 1
 #define MESSAGE_TIME  2
 #define MAX_MSG       1024
 
 typedef struct {
-	void *adt;
 	int index, pid;
 } message;
 message msg_queue[MAX_MSG];
@@ -294,7 +298,7 @@ pid_t getpgrp(void);
 pid_t setsid(void);
 int get_message(int *msg);
 int init_graphics(void);
-int repaint(int xpos, int ypos, char x);
+int repaint(paint_pos pos, char x);
 int timer_create(int millseconds, int type);
 int get_mouse_posx(void);
 int get_mouse_posy(void);
