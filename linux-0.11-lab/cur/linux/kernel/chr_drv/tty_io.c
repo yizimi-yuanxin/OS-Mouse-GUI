@@ -13,6 +13,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <signal.h>
+#include <unistd.h>
 
 #define ALRMMASK (1<<(SIGALRM-1))
 #define KILLMASK (1<<(SIGKILL-1))
@@ -360,36 +361,26 @@ int mouse_y_pos = 100;
 #define width 	320
 #define height 	200
 
-static int fcreate = 0;
-static int count   = 0;
-
-int volatile GetClicked;
-
-
 void readmouse(int mousecode) {
-	if (fcreate == 0)
-		fcreate = 1, count = 33;
 	int move_dis;
-	if (mousecode == 0xFA || mouse_input_count >= 4) { 		// 鼠标命令成功相应的 ACK 字节
+	if (mousecode == 0xFA) { 		// 鼠标命令成功相应的 ACK 字节
 		mouse_input_count = 1;
 		return;
 	} 
-	if (count != mousecode)
-		count = mousecode;
 	switch(mouse_input_count) {
 		case 1:
 			mouse_left_down = (mousecode & 0x1) == 0x1;
 			mouse_right_down = (mousecode & 0x2) == 0x2;
 			mouse_left_move = (mousecode & 0x10) == 0x10;
 			mouse_down_move = (mousecode & 0x20) == 0x20;
+
+			if (mousecode == 9)
+				post_message(MESSAGE_MOUSE);
+
 			++mouse_input_count;
-
-			if (mouse_left_down == 1 && mouse_down_move == 0 && mouse_left_move == 0)
-				post_message();
-
 			break;
 		case 2:
-			move_dis = mousecode >> 2;
+			move_dis = mousecode >> 6;
 			if (mouse_left_move)
 				mouse_x_pos += (int)(0xFFFFFF00 | move_dis);
 			else 
@@ -401,7 +392,7 @@ void readmouse(int mousecode) {
 			++mouse_input_count;
 			break;
 		case 3:
-			move_dis = mousecode >> 2;
+			move_dis = mousecode >> 6;
 			if (mouse_down_move)
 				mouse_y_pos += (int)(0xFFFFFF00 | move_dis);
 			else
@@ -410,9 +401,7 @@ void readmouse(int mousecode) {
 				mouse_y_pos = 0;
 			if (mouse_y_pos > width)
 				mouse_y_pos = width;
-			++mouse_input_count;
-			break;
-		case 4:
+			mouse_input_count = 1;
 			break;
 	}
 }

@@ -4,9 +4,10 @@
 #include <unistd.h>
 #include <time.h>
 
-_syscall0(int, get_message)
+_syscall1(int, get_message, int*, msg)
 _syscall0(int, init_graphics)
 _syscall3(int, repaint, int, xpos, int, ypos, char, x)
+_syscall2(int, timer_create, int, millseconds, int, type)
 
 #define BIRD_X      120
 #define BIRD_WIDTH  10
@@ -90,11 +91,10 @@ int _GAME_OVER() {
 }
 
 int main() {
-    srand((unsigned)time(NULL));
-    int pos, i, j, m;
+    int pos, i, j, *m;
     int now_x = 50, now_y = 100;
     int ok = 0;
-    init_graphics();
+    srand((unsigned)time(NULL));
     object_count = rand() % 20 + 1;
     for (i = 0; i < object_count; ++i) {
         objects[i].posx = 200 + i * 50;
@@ -102,20 +102,30 @@ int main() {
         objects[i].height = (rand() % 10) * 10;
         objects[i].width = 10;
     }
+    /*
+    init_graphics();
     init_gra();
     paint_bd(now_x, now_y);
     paint_ob();
-    for (pos = 0; pos < 100; ++pos) {
+    */
+    timer_create(4000, 0);
+    while(1) {
+        get_message(m);
+        if (*m == 0) continue;
+        printf("message: %d\n", *m);
+        if (*m == 1)  /* 经测试不知道为啥有时候会返回0有时候会返回1 */
+            now_y -= 20;
+        if (*m == 2)
+            now_y += 20;
+        /*
         init_gra();
         paint_ob();
         paint_bd(now_x, now_y);
-        m = get_message();
-        now_y = 100 - m * 20;
+        */
         if (get_stucked(now_x, now_y)) { ok = 1; break; }
         if (now_y - (BIRD_HEIGHT / 2) < 0 || now_y + (BIRD_HEIGHT / 2) >= 200) { ok = 1; break; }
         for (i = 0; i < object_count; ++i)
             objects[i].posx -= 20;
-        sleep(FLUSH_TIME);
     }
     if (ok) _GAME_OVER();
     return 0;

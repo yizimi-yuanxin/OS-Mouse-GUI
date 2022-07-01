@@ -356,11 +356,6 @@ int sys_init_graphics(void) {
 extern int mouse_x_pos;
 extern int mouse_y_pos;
 
-typedef struct mouse_pos mouse_pos;
-struct mouse_pos {
-	int x, y;
-};
-
 int sys_get_mouse_posx() {
 	return mouse_x_pos;
 }
@@ -369,46 +364,40 @@ int sys_get_mouse_posy() {
 	return mouse_y_pos;
 }
 
-int volatile GetClicked;
-
-int sys_get_message() {
-	user_timer *timer = timer_head;
-	if (timer == timer_tail) return 0;
-	if (timer->type == 1) return 1;
+int sys_get_message(int *msg) {
+	if (msg_queue_tail == msg_queue_head) {
+		put_fs_long(0, msg);
+		return -1;
+	}
+	int message_ret = msg_queue[msg_queue_head].index;
+	msg_queue[msg_queue_head].index = 0;
+	msg_queue_head = (msg_queue_head + 1) % MAX_MSG;
+	put_fs_long(message_ret, msg);
+	return 0;
 }
 
-// typedef struct user_timer user_timer;
-// typedef struct user_timer {
-//     long jiffies;
-//     int type;
-//     long init_jiffies;
-//     int pid;
-//     user_timer *next;
-// } ;
-// user_timer *timer_head;
-
-
 void post_message(int from) {
-	user_timer *timer = timer_tail;
-	timer->init_jiffies = timer_head->init_jiffies;
-	timer->jiffies = timer->init_jiffies;
-	timer->type = from;
-	timer_tail = (user_timer*)malloc(sizeof(user_timer));
-	timer->next = timer_tail;
-	timer->pid = current->pid;
+	// printk("post message: %d\n", from);
+	if (msg_queue_head - 1 != msg_queue_tail) {
+		// printk("post message: %d\n", from);
+		message msg;
+		msg.index = from;
+		msg.pid = current->pid;
+		msg_queue[msg_queue_tail] = msg;
+		msg_queue_tail = (msg_queue_tail + 1) % MAX_MSG;
+	}
 	return;
 }
 
-int sys_timer_create(int millsoconds) {
+int sys_timer_create(int millsoconds, int type) {
 	int jiffies = millsoconds / 10;
 	user_timer *timer = (user_timer*)malloc(sizeof(user_timer));
-	timer_head = timer;
-	timer_tail = (user_timer*)malloc(sizeof(user_timer));
 	timer->init_jiffies = jiffies;
 	timer->jiffies = jiffies;
-	timer->type = 0;
-	timer->next = timer_tail;
 	timer->pid = current->pid;
+	timer->type = type;
+	timer->next = timer_head;
+	timer_head = timer;
 	return 0;
 }
 

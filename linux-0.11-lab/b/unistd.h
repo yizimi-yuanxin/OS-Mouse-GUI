@@ -55,10 +55,28 @@
 #include <sys/utsname.h>
 #include <utime.h>
 
-typedef struct mouse_pos mouse_pos;
-struct mouse_pos {
-	int x, y;
-};
+typedef struct  {
+    long jiffies;
+    int type;
+    long init_jiffies;
+    int pid;
+    struct user_timer *next;
+} user_timer;
+user_timer *timer_head, *timer_tail;
+int msg_queue_head, msg_queue_tail;
+
+#define MESSAGE_MOUSE 1
+#define MESSAGE_TIME  2
+#define MAX_MSG       1024
+
+typedef struct {
+	void *adt;
+	int index, pid;
+} message;
+message msg_queue[MAX_MSG];
+
+extern void post_message(int type);
+
 
 #ifdef __LIBRARY__
 
@@ -274,10 +292,10 @@ int dup2(int oldfd, int newfd);
 int getppid(void);
 pid_t getpgrp(void);
 pid_t setsid(void);
-int get_message(void);
+int get_message(int *msg);
 int init_graphics(void);
 int repaint(int xpos, int ypos, char x);
-int timer_create(int millseconds);
+int timer_create(int millseconds, int type);
 int get_mouse_posx(void);
 int get_mouse_posy(void);
 

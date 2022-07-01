@@ -26,8 +26,8 @@ __always_inline _syscall0(int,pause)
 __always_inline _syscall1(int,setup,void *,BIOS)
 __always_inline _syscall0(int,sync)
 __always_inline _syscall0(int,init_graphics)
-__always_inline _syscall0(int,get_message)
-__always_inline _syscall1(int,timer_create,int,millsoconds)
+__always_inline _syscall1(int,get_message,int*, msg)
+__always_inline _syscall2(int,timer_create,int,millsoconds,int,type)
 
 #include <linux/tty.h>
 #include <linux/sched.h>
@@ -58,7 +58,7 @@ extern long startup_time;
 
 void message_init() {
 	timer_head = NULL;
-	timer_tail = NULL;
+	timer_tail = NULL; 
 	
 	msg_queue_head = msg_queue_tail = 0;
 	printk("message init finished\n");

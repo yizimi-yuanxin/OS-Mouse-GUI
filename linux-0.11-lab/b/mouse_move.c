@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-_syscall0(int, get_message)
+_syscall1(int, get_message, int*, msg)
 _syscall0(int, init_graphics)
 _syscall3(int, repaint, int, xpos, int, ypos, char, x)
 _syscall0(int, get_mouse_posx)
