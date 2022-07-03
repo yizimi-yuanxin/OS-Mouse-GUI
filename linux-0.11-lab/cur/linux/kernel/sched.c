@@ -309,6 +309,8 @@ void do_timer(long cpl)
 	extern void sysbeepstop(void);
 
 	user_timer *timer = timer_head;
+	user_timer *pre = NULL;
+
 	while (timer) {
 		user_timer *temp = timer->next;
 		timer->jiffies--;
@@ -317,7 +319,8 @@ void do_timer(long cpl)
 			if (timer->type == 0) {
 				timer->jiffies = timer->init_jiffies;
 			} else {
-				timer_head = timer->next;
+				if (pre) pre->next = timer->next;
+				else timer_head = timer->next;
 				free(timer);
 			}
 		}

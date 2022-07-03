@@ -229,6 +229,20 @@ errno=-__res; \
 return -1; \
 }
 
+#define _syscall5(type,name,atype,a,btype,b,ctype,c,dtype,d,etype,e) \
+type name(atype a,btype b,ctype c, dtype d, etype e) \
+{ \
+long __res; \
+__asm__ volatile ("int $0x80" \
+	: "=a" (__res) \
+	: "0" (__NR_##name),"b" ((long)(a)),"c" ((long)(b)),"d" ((long)(c)),"" ((long)(d)),"f" ((long)(e))); \
+if (__res>=0) \
+	return (type) __res; \
+errno=-__res; \
+return -1; \
+}
+
+
 #endif /* __LIBRARY__ */
 
 extern int errno;
@@ -298,7 +312,7 @@ pid_t getpgrp(void);
 pid_t setsid(void);
 int get_message(int *msg);
 int init_graphics(void);
-int repaint(paint_pos pos, char x);
+int repaint(int xpos, int ypos, char x);
 int timer_create(int millseconds, int type);
 int get_mouse_posx(void);
 int get_mouse_posy(void);

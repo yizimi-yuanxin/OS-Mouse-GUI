@@ -339,11 +339,11 @@ int sys_init_graphics(void) {
 
 		flag = 1;
 	}
-	// int i, j, x, y;
-	// char *p;
+	int i, j, x, y;
+	char *p;
 
-	// p = vga_graph_memstart;
-	// for (i = 0; i < vga_graph_memsize; ++i)  *(p++) = 3;
+	p = vga_graph_memstart;
+	for (i = 0; i < vga_graph_memsize; ++i)  *(p++) = 3;
 
 	// x = 20, y = 10;
 	// for (i = x - cursor_size; i <= x + cursor_size; ++i) {
@@ -366,7 +366,7 @@ int sys_get_mouse_posy() {
 
 int sys_get_message(int *msg) {
 	if (msg_queue_tail == msg_queue_head) {
-		put_fs_long(0, msg);
+		put_fs_long(-1, msg);
 		return -1;
 	}
 	int message_ret = msg_queue[msg_queue_head].index;
@@ -401,20 +401,52 @@ int sys_timer_create(int millsoconds, int type) {
 	return 0;
 }
 
-int sys_repaint(paint_pos pos, char x) {
-	int i, j;
-	if (pos.xpos1 < 0 || pos.xpos1 >= vga_width)	return -1;
-	if (pos.xpos2 < 0 || pos.xpos2 >= vga_width)	return -1;
-	if (pos.ypos1 < 0 || pos.ypos1 >= vga_height) 	return -1;
-	if (pos.ypos2 < 0 || pos.ypos2 >= vga_height) 	return -1;
-	if (pos.xpos1 > pos.xpos2)						return -1;
-	if (pos.ypos1 > pos.ypos2)						return -1;
+// int sys_repaint(paint_pos *pos, char x) {
+// 	int i, j;
+// 	paint_pos tp;
+// 	tp.xpos1 = get_fs_long(pos), 	 tp.xpos2 = get_fs_long(pos + 1);
+// 	tp.ypos1 = get_fs_long(pos + 2), tp.ypos2 = get_fs_long(pos + 3);
+// 	// printk("repaint: %d %d %d %d\n", tp.xpos1, tp.xpos2, tp.ypos1, tp.ypos2);
+// 	if (tp.xpos1 < 0 || tp.xpos1 >= vga_width)	return -1;
+// 	if (tp.xpos2 < 0 || tp.xpos2 >= vga_width)	return -1;
+// 	if (tp.ypos1 < 0 || tp.ypos1 >= vga_height) return -1;
+// 	if (tp.ypos2 < 0 || tp.ypos2 >= vga_height) return -1;
+// 	if (tp.xpos1 > tp.xpos2)					return -1;
+// 	if (tp.ypos1 > tp.ypos2)					return -1;
+	
+// 	char *p = vga_graph_memstart;
+// 	for (i = tp.xpos1; i <= tp.xpos2; ++i) {
+// 		for (j = tp.ypos1; j <= tp.ypos2; ++j) {
+// 			p = (char *)vga_graph_memstart + j * vga_width + i,
+// 			*p = 12;
+// 		}
+// 	}
+	
+// 	return 0;
+// }
+
+
+int sys_repaint(int xpos, int ypos, char x) {
+	int i, j, xpos1, xpos2, ypos1, ypos2;
+	xpos1 = xpos >> 9;
+	xpos2 = xpos % 512;
+	ypos1 = ypos >> 9;
+	ypos2 = ypos % 512;
+	// printk("repaint: %d %d %d %d\n", xpos1, xpos2, ypos1, ypos2);
+	if (xpos1 < 0 || xpos1 >= vga_width)	return -1;
+	if (xpos2 < 0 || xpos2 >= vga_width)	return -1;
+	if (ypos1 < 0 || ypos1 >= vga_height) 	return -1;
+	if (ypos2 < 0 || ypos2 >= vga_height) 	return -1;
+	if (xpos1 > xpos2)						return -1;
+	if (ypos1 > ypos2)						return -1;
 	
 	char *p = vga_graph_memstart;
-	for (i = pos.xpos1; i <= pos.xpos2; ++i) 
-		for (j = pos.ypos1; j <= pos.ypos2; ++j)
-		p = (char *)vga_graph_memstart + j * vga_width + i,
-		*p = x;
-
+	for (i = xpos1; i <= xpos2; ++i) {
+		for (j = ypos1; j <= ypos2; ++j) {
+			p = (char *)vga_graph_memstart + j * vga_width + i,
+			*p = x;
+		}
+	}
+	
 	return 0;
 }

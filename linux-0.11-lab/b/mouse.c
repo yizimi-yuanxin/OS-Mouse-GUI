@@ -10,7 +10,7 @@ int main() {
     timer_create(2000, 0);
     for (i = 0; i > -1; ++i) {
         get_message(&m);
-        if (m != 0)
+        if (m != -1)
             printf("message: %d\n", m);
     }
         /* sleep(10); */
