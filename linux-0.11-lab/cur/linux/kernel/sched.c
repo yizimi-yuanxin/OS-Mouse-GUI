@@ -17,6 +17,7 @@
 #include <asm/system.h>
 #include <asm/io.h>
 #include <asm/segment.h>
+#include <unistd.h>
 
 #include <signal.h>
 
@@ -306,6 +307,25 @@ void do_timer(long cpl)
 {
 	extern int beepcount;
 	extern void sysbeepstop(void);
+
+	user_timer *timer = timer_head;
+	user_timer *pre = NULL;
+
+	while (timer) {
+		user_timer *temp = timer->next;
+		timer->jiffies--;
+		if (timer->jiffies == 0) {
+			post_message(MESSAGE_TIME);
+			if (timer->type == 0) {
+				timer->jiffies = timer->init_jiffies;
+			} else {
+				if (pre) pre->next = timer->next;
+				else timer_head = timer->next;
+				free(timer);
+			}
+		}
+		timer = temp;
+	}
 
 	if (beepcount)
 		if (!--beepcount)

@@ -13,6 +13,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <signal.h>
+#include <unistd.h>
 
 #define ALRMMASK (1<<(SIGALRM-1))
 #define KILLMASK (1<<(SIGKILL-1))
@@ -346,4 +347,61 @@ void do_tty_interrupt(int tty)
 
 void chr_dev_init(void)
 {
+}
+
+static unsigned char mouse_input_count = 0;		// 鼠标输入字节数
+static unsigned char mouse_left_down;			// 鼠标左键按下
+static unsigned char mouse_right_down;			// 鼠标右键按下
+static unsigned char mouse_left_move;			// 鼠标向左移动
+static unsigned char mouse_down_move;			// 鼠标向下移动
+
+int mouse_x_pos = 160;
+int mouse_y_pos = 100;
+
+#define width 	320
+#define height 	200
+
+void readmouse(int mousecode) {
+	int move_dis;
+	if (mousecode == 0xFA) { 		// 鼠标命令成功相应的 ACK 字节
+		mouse_input_count = 1;
+		return;
+	} 
+	switch(mouse_input_count) {
+		case 1:
+			mouse_left_down = (mousecode & 0x1) == 0x1;
+			mouse_right_down = (mousecode & 0x2) == 0x2;
+			mouse_left_move = (mousecode & 0x10) == 0x10;
+			mouse_down_move = (mousecode & 0x20) == 0x20;
+
+			if (mouse_left_down)
+				post_message(MESSAGE_MOUSE);
+
+			++mouse_input_count;
+			break;
+		case 2:
+			move_dis = mousecode >> 6;
+			if (mouse_left_move)
+				mouse_x_pos += (int)(0xFFFFFF00 | move_dis);
+			else 
+				mouse_x_pos += (int)(move_dis);
+			if (mouse_x_pos < 0)
+				mouse_x_pos = 0;
+			if (mouse_x_pos > height)
+				mouse_x_pos = height;
+			++mouse_input_count;
+			break;
+		case 3:
+			move_dis = mousecode >> 6;
+			if (mouse_down_move)
+				mouse_y_pos += (int)(0xFFFFFF00 | move_dis);
+			else
+				mouse_y_pos += (int)(move_dis);
+			if (mouse_y_pos < 0)
+				mouse_y_pos = 0;
+			if (mouse_y_pos > width)
+				mouse_y_pos = width;
+			mouse_input_count = 1;
+			break;
+	}
 }

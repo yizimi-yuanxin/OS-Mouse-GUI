@@ -1,0 +1,17 @@
+make.exe --dry-run --always-make --keep-going --print-directory
+make version 1.1 (Jan 28 2007)
+Usage:
+ make.exe [-f makefile] [-inpqrst] [macro=val ...] [target...]
+ Options :
+   -c print all source files in standard output
+   -f makefile name
+   -i ignore exit status
+   -n Pretend to make
+   -p Print all macros & targets
+   -q Question up-to-dateness of target.  (1 = not up to date)
+   -r Don't not use builtin rules
+   -s Make silently
+   -t Touch files instead of making them
+   -h This help menu
+
+

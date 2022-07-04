@@ -55,6 +55,33 @@
 #include <sys/utsname.h>
 #include <utime.h>
 
+typedef struct {
+	int xpos1, xpos2;
+	int ypos1, ypos2;
+} paint_pos;
+
+typedef struct {
+    long jiffies;
+    int type;
+    long init_jiffies;
+    int pid;
+    struct user_timer *next;
+} user_timer;
+user_timer *timer_head, *timer_tail;
+unsigned int msg_queue_head, msg_queue_tail;
+
+#define MESSAGE_MOUSE 1
+#define MESSAGE_TIME  2
+#define MAX_MSG       1024
+
+typedef struct {
+	int index, pid;
+} message;
+message msg_queue[MAX_MSG];
+
+extern void post_message(int type);
+
+
 #ifdef __LIBRARY__
 
 #define __NR_setup	0	/* used only by init, to get system going */
@@ -144,6 +171,12 @@
 #define __NR_lstat	84
 #define __NR_readlink	85
 #define __NR_uselib	86
+#define __NR_init_graphics 87
+#define __NR_get_message 88
+#define __NR_repaint 89
+#define __NR_timer_create 90
+#define __NR_get_mouse_posx 91
+#define __NR_get_mouse_posy 92
 #define _syscall0(type,name) \
 type name(void) \
 { \
@@ -195,6 +228,20 @@ if (__res>=0) \
 errno=-__res; \
 return -1; \
 }
+
+#define _syscall5(type,name,atype,a,btype,b,ctype,c,dtype,d,etype,e) \
+type name(atype a,btype b,ctype c, dtype d, etype e) \
+{ \
+long __res; \
+__asm__ volatile ("int $0x80" \
+	: "=a" (__res) \
+	: "0" (__NR_##name),"b" ((long)(a)),"c" ((long)(b)),"d" ((long)(c)),"" ((long)(d)),"f" ((long)(e))); \
+if (__res>=0) \
+	return (type) __res; \
+errno=-__res; \
+return -1; \
+}
+
 
 #endif /* __LIBRARY__ */
 
@@ -263,6 +310,12 @@ int dup2(int oldfd, int newfd);
 int getppid(void);
 pid_t getpgrp(void);
 pid_t setsid(void);
+int get_message(int *msg);
+int init_graphics(void);
+int repaint(int xpos, int ypos, char x);
+int timer_create(int millseconds, int type);
+int get_mouse_posx(void);
+int get_mouse_posy(void);
 
 #define __always_inline inline __attribute__((always_inline))
 

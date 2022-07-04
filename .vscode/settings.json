@@ -1,0 +1,29 @@
+{
+    "makefile.extensionOutputFolder": "./.vscode",
+    "files.associations": {
+        "array": "c",
+        "string": "c",
+        "string_view": "c",
+        "*.tcc": "cpp",
+        "chrono": "cpp",
+        "ctime": "cpp",
+        "future": "cpp",
+        "iomanip": "cpp",
+        "limits": "cpp",
+        "numeric": "cpp",
+        "ratio": "cpp",
+        "shared_mutex": "cpp",
+        "streambuf": "cpp",
+        "tuple": "cpp",
+        "type_traits": "cpp",
+        "utility": "cpp",
+        "iostream": "cpp",
+        "new": "cpp",
+        "*.rmd": "markdown",
+        "xstring": "cpp",
+        "xtree": "cpp",
+        "set": "cpp",
+        "ios": "cpp",
+        "unistd.h": "c"
+    }
+}

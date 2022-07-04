@@ -89,6 +89,12 @@ extern int sys_symlink();
 extern int sys_lstat();
 extern int sys_readlink();
 extern int sys_uselib();
+extern int sys_init_graphics();
+extern int sys_get_message();
+extern int sys_repaint();
+extern int sys_timer_create();
+extern int sys_get_mouse_posx();
+extern int sys_get_mouse_posy();
 
 fn_ptr sys_call_table[] = { sys_setup, sys_exit, sys_fork, sys_read,
 sys_write, sys_open, sys_close, sys_waitpid, sys_creat, sys_link,
@@ -105,7 +111,8 @@ sys_getpgrp, sys_setsid, sys_sigaction, sys_sgetmask, sys_ssetmask,
 sys_setreuid,sys_setregid, sys_sigsuspend, sys_sigpending, sys_sethostname,
 sys_setrlimit, sys_getrlimit, sys_getrusage, sys_gettimeofday, 
 sys_settimeofday, sys_getgroups, sys_setgroups, sys_select, sys_symlink,
-sys_lstat, sys_readlink, sys_uselib };
+sys_lstat, sys_readlink, sys_uselib, sys_init_graphics, sys_get_message, 
+sys_repaint, sys_timer_create, sys_get_mouse_posx, sys_get_mouse_posy };
 
 /* So we don't have to do any more manual updating.... */
 int NR_syscalls = sizeof(sys_call_table)/sizeof(fn_ptr);

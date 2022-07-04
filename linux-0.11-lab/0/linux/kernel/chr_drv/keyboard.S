@@ -14,6 +14,7 @@
 
 .text
 .globl keyboard_interrupt
+.globl mouse_interrupt
 
 /*
  * these are for the keyboard read functions
@@ -586,3 +587,5 @@ reboot:
 	movb $0xfc,%al		/* pulse reset and A20 low */
 	outb %al,$0x64
 die:	jmp die
+
+
