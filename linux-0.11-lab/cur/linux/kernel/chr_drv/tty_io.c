@@ -374,7 +374,7 @@ void readmouse(int mousecode) {
 			mouse_left_move = (mousecode & 0x10) == 0x10;
 			mouse_down_move = (mousecode & 0x20) == 0x20;
 
-			if (mousecode == 9)
+			if (mouse_left_down)
 				post_message(MESSAGE_MOUSE);
 
 			++mouse_input_count;

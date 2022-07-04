@@ -8,6 +8,9 @@ typedef struct {
 	int ypos1, ypos2;
 } paint_pos_t;
 /*
+#define DEBUG
+*/
+/*
 typedef struct paint_pos_t paint_pos_t;
 */
 _syscall1(int, get_message, int*, msg)
@@ -56,7 +59,11 @@ void paint(object p, char x) {
     if (ypos1 == ypos2 && ypos1 == 0) return;
     if (xpos1 == xpos2 && xpos1 == MAX_X - 1) return;
     if (ypos1 == ypos2 && ypos1 == MAX_Y - 1) return;
+#ifdef DEBUG
+    printf("repaint: %d %d %d %d %d\n", xpos1, xpos2, ypos1, ypos2, x);
+#else
     repaint(((xpos1 << 9) | xpos2), ((ypos1 << 9) | ypos2), x);
+#endif // DEBUG
 }
 
 int object_count;
@@ -99,44 +106,41 @@ int main() {
         objects[i].xpos2 = 200 + i * 50 + (BIRD_WIDTH / 2);
         if (rand() % 2)
             objects[i].ypos1 = 0, 
-            objects[i].ypos2 = rand() % 200 + 1;
+            objects[i].ypos2 = rand() % 100 + 1;
         else 
-            objects[i].ypos1 = rand(),
+            objects[i].ypos1 = rand() % 100 + 100,
             objects[i].ypos2 = 199;
     }
     /*
     */
+#ifndef DEBUG
     init_graphics();
+#endif // !DEBUG
+
     all.xpos1 = 0, all.xpos2 = 319;
     all.ypos1 = 0, all.ypos2 = 199;
 
     for (i = 0; i < object_count; ++i)
         paint(objects[i], 12);
 
-    /* repaint(((all.xpos1 << 9) | all.xpos2), ((all.ypos1 << 9) | all.ypos2), 3); */
-
     bird.xpos1 = now_x - (BIRD_WIDTH / 2);
     bird.xpos2 = now_x + (BIRD_WIDTH / 2);
     bird.ypos1 = now_y - (BIRD_HEIGHT / 2);
     bird.ypos2 = now_y + (BIRD_HEIGHT / 2);
 
-    /*
-    repaint(((bird.xpos1 << 9) | bird.xpos2), ((bird.ypos1 << 9) | bird.ypos2), 12);  
-    */
     paint(bird, 12);
 
     for (i = 0; i < object_count; ++i) {
         paint(objects[i], 12);
     }
-    /*
-    */
+    
     timer_create(2000, 0);
     while(1) {
         get_message(m);
         if (*m == -1) continue;
-        /* 
+#ifdef DEBUG
         printf("message: %d\n", *m); 
-        */
+#endif // DEBUG
         if (*m == 1 || *m == 0) 
             now_y -= 20;
         if (*m == 2)
